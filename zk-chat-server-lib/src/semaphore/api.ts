@@ -72,7 +72,7 @@ const getRemovedMembersForGroup = async (baseUrl: string, id: string): Promise<n
         });
         // TODO: ask if this is the right way to detect removed members
         const removedMembers: number[] = res.data.members
-            .filter((member:string) => member === '00000000000000000000000000000000000000000000000000000000000000000000000000000')
+            .filter((member:string) => member === hash(id).toString())
             .map((member: string, index: number) => {
                 return {
                     index,
