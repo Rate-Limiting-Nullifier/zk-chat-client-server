@@ -99,7 +99,7 @@ services:
     labels:
       - 'traefik.enable=true'
       - 'traefik.docker.network=rlnanonymouschat_apinetwork'
-      - 'traefik.http.routers.client.rule=Host(`www.test-zk-chat.mhchia.com`) || Host(`test-zk-chat.mhchia.com`)'
+      - 'traefik.http.routers.client.rule=Host(`test-zk-chat.mhchia.com`)'
       - 'traefik.http.routers.client.tls=true'
       - 'traefik.http.routers.client.tls.certresolver=lets-encrypt'
 
@@ -107,7 +107,7 @@ services:
       - PORT=3000
       - REACT_APP_SERVER_HOST=https://api.test-zk-chat.mhchia.com
       - REACT_APP_SOCKET_HOST=wss://api-ws.test-zk-chat.mhchia.com
-      - REACT_APP_ENV=https://www.test-zk-chat.mhchia.com
+      - REACT_APP_ENV=https://test-zk-chat.mhchia.com
     depends_on:
       - mongo
       - redis
