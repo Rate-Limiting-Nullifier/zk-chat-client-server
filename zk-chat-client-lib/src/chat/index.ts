@@ -44,6 +44,7 @@ class ChatManager {
         this.message_db = message_db;
 
         this.hasher = new Hasher();
+        this.message_callback = null;
     }
 
     public async setRootObsolete() {
@@ -105,8 +106,15 @@ class ChatManager {
     }
 
     public async registerReceiveMessageHandler(receive_msg_callback: (message: IMessage, chat_room_id: string) => void) {
-        this.message_callback = receive_msg_callback;
-        this.communication_manager.receiveMessage(this.messageHandlerForRooms.bind(this))
+        if (this.message_callback === null) {
+            this.message_callback = receive_msg_callback;
+            this.communication_manager.receiveMessage(this.messageHandlerForRooms.bind(this));
+        } else {
+            // Don't register the callback again to avoid receiving the same message twice.
+            console.info(
+                "`message_callback` already registered before, just return"
+            )
+        }
     }
 
     private async messageHandlerForRooms(message: string) {
