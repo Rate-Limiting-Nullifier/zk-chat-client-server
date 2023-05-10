@@ -12,25 +12,26 @@ import { PCD, PCDPackage } from "@pcd/pcd-types";
 
 import { serverUrl } from "../constants/constants";
 
-// FIXME: reuse from zk-chat-client
+// FIXME: reused from zk-chat-client
 const DEFAULT_DEPTH = 16
 const DEFAULT_GROUP_ID = "1"
 const DEFAULT_SIGNED_MESSAGE = "zk-chat-get-identity-commitment";
 
+// FIXME: currentPopup is used to keep track of the popup window and making sure there is only
+// one popup window open at a time. This is a hacky solution and should be replaced with a
+// better solution.
 let currentPopup: Window | null = null;
+// FIXME: currentMessageListener is used to keep track of the event listener for the popup window,
+// to avoid registering more than 1 event listener at a time. This is a hacky solution and should
+// be replaced with a better solution.
+let currentMessageListener: ((event: MessageEvent) => void) | null = null;
 
 export async function getPCDFromPassport(
   popupUrl: string,
   pkg: PCDPackage,
 ): Promise<PCD | undefined> {
   return new Promise(async (resolve, reject) => {
-    if (currentPopup && !currentPopup.closed) {
-      currentPopup.close();
-    }
-    currentPopup = window.open(popupUrl, "popup", "width=600,height=600");
-
     const receiveMessage = (event: MessageEvent) => {
-      console.log("!@# getPCDFromPassport: Received message from passport, event: ", event);
       const encodedPCD = event.data.encodedPCD;
 
       if (encodedPCD) {
@@ -42,15 +43,29 @@ export async function getPCDFromPassport(
           pkg.deserialize(parsedPCD.pcd).then((pcd) => {
             // Remove the event listener when the promise is resolved.
             window.removeEventListener("message", receiveMessage);
+            currentMessageListener = null;
             resolve(pcd as PCD);
           });
         }
       }
     };
 
+    if (currentPopup && !currentPopup.closed) {
+      // If there is already a popup open, close it and unregister the old event listener.
+      if (currentMessageListener) {
+        window.removeEventListener("message", currentMessageListener);
+        currentMessageListener = null;
+      }
+      currentPopup.close();
+    }
+    currentPopup = window.open(popupUrl, "popup", "width=600,height=600");
+
+    currentMessageListener = receiveMessage;
     window.addEventListener("message", receiveMessage);
     let isCleaningUp = false;
 
+    // Clean up is called when the popup is closed, or when the user
+    // navigates away from the page.
     const cleanup = () => {
       if (isCleaningUp) {
         return;
@@ -58,6 +73,7 @@ export async function getPCDFromPassport(
 
       isCleaningUp = true;
       window.removeEventListener("message", receiveMessage);
+      currentMessageListener = null;
 
       if (currentPopup) {
         currentPopup.close();
