@@ -42,47 +42,51 @@ export async function getPCDFromPassport(
         } else {
           pkg.deserialize(parsedPCD.pcd).then((pcd) => {
             // Remove the event listener when the promise is resolved.
+            // window.removeEventListener("message", receiveMessage);
+            // currentMessageListener = null;
             window.removeEventListener("message", receiveMessage);
             currentMessageListener = null;
+            if (currentPopup) {
+              if (!currentPopup.closed) {
+                currentPopup.close();
+              }
+              currentPopup = null;
+            }
             resolve(pcd as PCD);
-          });
+          }).catch((err) => reject(err));
         }
       }
     };
 
-    if (currentPopup && !currentPopup.closed) {
-      // If there is already a popup open, close it and unregister the old event listener.
-      if (currentMessageListener) {
-        window.removeEventListener("message", currentMessageListener);
-        currentMessageListener = null;
-      }
-      currentPopup.close();
-    }
-    currentPopup = window.open(popupUrl, "popup", "width=600,height=600");
-
-    currentMessageListener = receiveMessage;
-    window.addEventListener("message", receiveMessage);
     let isCleaningUp = false;
-
-    // Clean up is called when the popup is closed, or when the user
-    // navigates away from the page.
     const cleanup = () => {
       if (isCleaningUp) {
         return;
       }
 
       isCleaningUp = true;
-      window.removeEventListener("message", receiveMessage);
-      currentMessageListener = null;
+      if (currentMessageListener) {
+        window.removeEventListener("message", currentMessageListener);
+        currentMessageListener = null;
+      }
 
       if (currentPopup) {
-        currentPopup.close();
+        if (!currentPopup.closed) {
+          currentPopup.close();
+        }
+        currentPopup = null;
       }
     };
-
-    if (currentPopup && currentPopup.window) {
-      currentPopup.addEventListener("beforeunload", cleanup);
+    // Clean up previous windows and event listeners before opening a new one.
+    cleanup();
+    currentPopup = window.open(popupUrl, "popup", "width=600,height=600");
+    if (!currentPopup) {
+      reject(new Error("Failed to open the popup window."));
+      return;
     }
+
+    currentMessageListener = receiveMessage;
+    window.addEventListener("message", receiveMessage);
   });
 }
 
