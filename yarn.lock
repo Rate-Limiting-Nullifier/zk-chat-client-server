@@ -15737,10 +15737,10 @@ test-pcd-semaphore-signature-pcd@^0.4.3:
     react "^17.0.2"
     typescript "^4.5.2"
 
-test-zk-chat-client@1.0.23:
-  version "1.0.23"
-  resolved "https://registry.yarnpkg.com/test-zk-chat-client/-/test-zk-chat-client-1.0.23.tgz#7d3a79cf61effd3ec3ccce5d5c99a29bddbd1510"
-  integrity sha512-qtzPiuxuv7Hk7X15oBHSDXsd/ZU7kZaGvwJry6rARjrGEzAMuRo2ouKE4aq7m9RSP+W6Kw9H/L7QVgOXyPs2pg==
+test-zk-chat-client@1.0.31:
+  version "1.0.31"
+  resolved "https://registry.yarnpkg.com/test-zk-chat-client/-/test-zk-chat-client-1.0.31.tgz#4ad0f9dfd57c24d369a08926634cf44c1c5d5311"
+  integrity sha512-pvzjRkdBCvAGbD9tnceRrn2TxSqimycgqSAQPmp+NiLyWdxUZGmFsJezRqblkafFjTLdk3DTnAFudlbZr1NI9Q==
   dependencies:
     "@zk-kit/identity" "^1.4.1"
     "@zk-kit/protocols" "^1.8.2"
