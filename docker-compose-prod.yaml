@@ -61,12 +61,11 @@ services:
     image: njofce/rln-chat-client
     container_name: client
     ports:
-      - "3000:3000"
+      - "5566:5566"
     expose:
-      - 3000
+      - 5566
     restart: always
     environment:
-      - PORT=5566
       - PORT=5566
       - REACT_APP_SERVER_HOST=https://zkchat.mhchia.com:8080
       - REACT_APP_SOCKET_HOST=wss://zkchat.mhchia.com:8081
