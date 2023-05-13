@@ -8,67 +8,108 @@ import {
 } from "./passport-interface";
 import { RLNPCD, RLNPCDPackage } from "./rln-pcd";
 
+import { PCD, PCDPackage } from "@pcd/pcd-types";
+
 import { serverUrl } from "../constants/constants";
 
-// FIXME: reuse from zk-chat-client
+// FIXME: reused from zk-chat-client
 const DEFAULT_DEPTH = 16
 const DEFAULT_GROUP_ID = "1"
 const DEFAULT_SIGNED_MESSAGE = "zk-chat-get-identity-commitment";
 
-// Popup window will redirect to the passport to request a proof.
-// Open the popup window under the current domain, let it redirect there:
-export function requestProofFromPassport(proofUrl: string) {
-  const popupUrl = `/popup?proofUrl=${encodeURIComponent(proofUrl)}`;
-  window.open(popupUrl, "_blank", "width=360,height=480,top=100,popup");
+// FIXME: currentPopup is used to keep track of the popup window and making sure there is only
+// one popup window open at a time. This is a hacky solution and should be replaced with a
+// better solution.
+let currentPopup: Window | null = null;
+// FIXME: currentMessageListener is used to keep track of the event listener for the popup window,
+// to avoid registering more than 1 event listener at a time. This is a hacky solution and should
+// be replaced with a better solution.
+let currentMessageListener: ((event: MessageEvent) => void) | null = null;
+
+export async function getPCDFromPassport(
+  popupUrl: string,
+  pkg: PCDPackage,
+): Promise<PCD | undefined> {
+  return new Promise(async (resolve, reject) => {
+    const receiveMessage = (event: MessageEvent) => {
+      const encodedPCD = event.data.encodedPCD;
+
+      if (encodedPCD) {
+        console.log("!@# getPCDFromPassport: Received PCD", encodedPCD);
+        const parsedPCD = JSON.parse(decodeURIComponent(encodedPCD));
+        if (parsedPCD.type !== pkg.name) {
+          resolve(undefined);
+        } else {
+          pkg.deserialize(parsedPCD.pcd).then((pcd) => {
+            // Remove the event listener when the promise is resolved.
+            // window.removeEventListener("message", receiveMessage);
+            // currentMessageListener = null;
+            window.removeEventListener("message", receiveMessage);
+            currentMessageListener = null;
+            if (currentPopup) {
+              if (!currentPopup.closed) {
+                currentPopup.close();
+              }
+              currentPopup = null;
+            }
+            resolve(pcd as PCD);
+          }).catch((err) => reject(err));
+        }
+      }
+    };
+
+    let isCleaningUp = false;
+    const cleanup = () => {
+      if (isCleaningUp) {
+        return;
+      }
+
+      isCleaningUp = true;
+      if (currentMessageListener) {
+        window.removeEventListener("message", currentMessageListener);
+        currentMessageListener = null;
+      }
+
+      if (currentPopup) {
+        if (!currentPopup.closed) {
+          currentPopup.close();
+        }
+        currentPopup = null;
+      }
+    };
+    // Clean up previous windows and event listeners before opening a new one.
+    cleanup();
+    currentPopup = window.open(popupUrl, "popup", "width=600,height=600");
+    if (!currentPopup) {
+      reject(new Error("Failed to open the popup window."));
+      return;
+    }
+
+    currentMessageListener = receiveMessage;
+    window.addEventListener("message", receiveMessage);
+  });
 }
 
 export async function getIdentityCommitment(
   messageToSign?: string,
   proveOnServer: boolean = false,
 ): Promise<SemaphoreSignaturePCD | undefined> {
-  return new Promise(async (resolve, reject) => {
-    if (!messageToSign) {
-      messageToSign = DEFAULT_SIGNED_MESSAGE;
-    }
-    const returnUrl = window.location.origin + "/popup";
-    const popupUrl = requestSemaphoreSignatureUrl(
-      PASSPORT_URL,
-      returnUrl,
-      messageToSign,
-      proveOnServer
-    );
-    const popup = window.open(popupUrl, "popup", "width=600,height=600");
-    const receiveMessage = (event: MessageEvent) => {
-      // if (event.origin !== PASSPORT_URL) {
-      //   return;
-      // }
-
-      const encodedPCD = event.data.encodedPCD;
-
-      if (encodedPCD) {
-        console.log("!@# Received PCD", encodedPCD);
-        const parsedPCD = JSON.parse(decodeURIComponent(encodedPCD));
-        if (parsedPCD.type !== SemaphoreSignaturePCDPackage.name) {
-          resolve(undefined);
-        } else {
-          SemaphoreSignaturePCDPackage.deserialize(parsedPCD.pcd).then((pcd) => {
-            resolve(pcd as SemaphoreSignaturePCD);
-          });
-        }
-      }
-    };
-
-    window.addEventListener("message", receiveMessage);
-
-    const cleanup = () => {
-      window.removeEventListener("message", receiveMessage);
-      if (popup) {
-        popup.close();
-      }
-    };
-
-    popup?.addEventListener("beforeunload", cleanup);
-  });
+  if (!messageToSign) {
+    messageToSign = DEFAULT_SIGNED_MESSAGE;
+  }
+  const returnUrl = window.location.origin + "/popup";
+  const popupUrl = requestSemaphoreSignatureUrl(
+    PASSPORT_URL,
+    returnUrl,
+    messageToSign,
+    proveOnServer
+  );
+  const res = await getPCDFromPassport(popupUrl, SemaphoreSignaturePCDPackage) ;
+  if (res === undefined) {
+    return undefined;
+  } else {
+    return res as SemaphoreSignaturePCD;
+  }
 }
 
 async function getSlashedGroup(): Promise<Group> {
@@ -99,48 +140,21 @@ export async function generateRLNProof(
   rlnIdentifier: bigint,
   proveOnServer = false,
 ): Promise<RLNPCD | undefined> {
-  return new Promise(async (resolve, reject) => {
-    const returnUrl = window.location.origin + "/popup";
-    const group = await getSlashedGroup();
-    const popupUrl = requestZuzaluRLNUrl(
-      PASSPORT_URL,
-      returnUrl,
-      group,
-      rlnIdentifier.toString(),
-      signal,
-      epoch.toString(),
-      proveOnServer
-    );
-    const popup = window.open(popupUrl, "popup", "width=600,height=600");
-    const receiveMessage = (event: MessageEvent) => {
-      // if (event.origin !== PASSPORT_URL) {
-      //   return;
-      // }
-
-      const encodedPCD = event.data.encodedPCD;
-
-      if (encodedPCD) {
-        console.log("!@# Received PCD", encodedPCD);
-        const parsedPCD = JSON.parse(decodeURIComponent(encodedPCD));
-        if (parsedPCD.type !== RLNPCDPackage.name) {
-          resolve(undefined);
-        } else {
-          RLNPCDPackage.deserialize(parsedPCD.pcd).then((pcd) => {
-            resolve(pcd as RLNPCD);
-          });
-        }
-      }
-    };
-
-    window.addEventListener("message", receiveMessage);
-
-    const cleanup = () => {
-      window.removeEventListener("message", receiveMessage);
-      if (popup) {
-        popup.close();
-      }
-    };
-
-    popup?.addEventListener("beforeunload", cleanup);
-  });
+  const returnUrl = window.location.origin + "/popup";
+  const group = await getSlashedGroup();
+  const popupUrl = requestZuzaluRLNUrl(
+    PASSPORT_URL,
+    returnUrl,
+    group,
+    rlnIdentifier.toString(),
+    signal,
+    epoch.toString(),
+    proveOnServer
+  );
+  const res = await getPCDFromPassport(popupUrl, RLNPCDPackage) ;
+  if (res === undefined) {
+    return undefined;
+  } else {
+    return res as RLNPCD;
+  }
 }

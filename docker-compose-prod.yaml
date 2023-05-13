@@ -68,7 +68,7 @@ services:
       - REDIS_PASSWORD=password
       - REDIS_CHANNEL=nodeSync
       - INTERREP_BASE_URL=https://api.thegraph.com/subgraphs/name/interrep/kovan
-      - INTERREP_V2=https://api.pcd-passport.com
+      - INTERREP_V2=https://test-zupass.mhchia.com:3002
       - DB_CONNECTION_STRING=mongodb://mongo:27017/test
       - SERVER_PORT=8080
       - SOCKET_SERVER_PORT=8081
@@ -99,7 +99,7 @@ services:
     labels:
       - 'traefik.enable=true'
       - 'traefik.docker.network=rlnanonymouschat_apinetwork'
-      - 'traefik.http.routers.client.rule=Host(`www.test-zk-chat.mhchia.com`) || Host(`test-zk-chat.mhchia.com`)'
+      - 'traefik.http.routers.client.rule=Host(`test-zk-chat.mhchia.com`)'
       - 'traefik.http.routers.client.tls=true'
       - 'traefik.http.routers.client.tls.certresolver=lets-encrypt'
 
@@ -107,7 +107,7 @@ services:
       - PORT=3000
       - REACT_APP_SERVER_HOST=https://api.test-zk-chat.mhchia.com
       - REACT_APP_SOCKET_HOST=wss://api-ws.test-zk-chat.mhchia.com
-      - REACT_APP_ENV=https://www.test-zk-chat.mhchia.com
+      - REACT_APP_ENV=https://test-zk-chat.mhchia.com
     depends_on:
       - mongo
       - redis
