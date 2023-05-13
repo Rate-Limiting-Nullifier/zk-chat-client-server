@@ -3,6 +3,10 @@
 import axios from 'axios';
 import { IGroupMember, ISemaphoreRepGroupV2 } from "./interfaces";
 
+// semaphore group: hash(DEFAULT_SEMAPHORE_GROUP)
+// Ref: https://github.com/semaphore-protocol/semaphore/blob/22f33a8f263cb447417faeee68664046b4d716b4/packages/group/src/group.ts#L22
+export const DEFAULT_ZERO_VALUE = BigInt("312829776796408387545637016147278514583116203736587368460269838669765409292")
+
 /**
  * Returns only the supported groups
  */
@@ -70,9 +74,8 @@ const getRemovedMembersForGroup = async (baseUrl: string, id: string): Promise<n
                 'Accept': 'application/json',
             }
         });
-        // TODO: ask if this is the right way to detect removed members
         const removedMembers: number[] = res.data.members
-            .filter((member:string) => member === hash(id).toString())
+            .filter((member:string) => member === DEFAULT_ZERO_VALUE.toString())
             .map((member: string, index: number) => {
                 return {
                     index,
