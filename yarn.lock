@@ -15737,10 +15737,10 @@ test-pcd-semaphore-signature-pcd@^0.4.3:
     react "^17.0.2"
     typescript "^4.5.2"
 
-test-zk-chat-client@1.0.32:
-  version "1.0.32"
-  resolved "https://registry.yarnpkg.com/test-zk-chat-client/-/test-zk-chat-client-1.0.32.tgz#b936d2097fe82b903ce013009c30912fbd711830"
-  integrity sha512-F1HUZThH2Bj+EfsJVfKMnf5UAI+H/ZJLikuh8FoEYchcq4IfBWZbNUZldQf6r12pGZEizEb2EufL+Jv8N394UQ==
+test-zk-chat-client@1.0.34:
+  version "1.0.34"
+  resolved "https://registry.yarnpkg.com/test-zk-chat-client/-/test-zk-chat-client-1.0.34.tgz#31d0aa4a0cd64c4342fe684d230588a577c44e47"
+  integrity sha512-DtIjg1mQ6NPPyBXytXYc7MABOd4Z6G2O1jUAzghp4cNl6y2qUN5267qThbAN5vOFVR5f+XPyIrDGHOHqf+KLHg==
   dependencies:
     "@zk-kit/identity" "^1.4.1"
     "@zk-kit/protocols" "^1.8.2"
@@ -15753,10 +15753,10 @@ test-zk-chat-client@1.0.32:
     uuid "^8.3.2"
     ws "^8.3.0"
 
-test-zk-chat-server@1.0.39:
-  version "1.0.39"
-  resolved "https://registry.yarnpkg.com/test-zk-chat-server/-/test-zk-chat-server-1.0.39.tgz#b7060858c2f0e20d2a5527ff760d7d9f82c71022"
-  integrity sha512-KwEXSsrBXZRyspsaWfphI3VyLTBFHgjQYbi8sC0lU6buxY4Eom1XBlKO5RYYOb9GfRC09IqTzsW99JGzbYA42w==
+test-zk-chat-server@1.0.44:
+  version "1.0.44"
+  resolved "https://registry.yarnpkg.com/test-zk-chat-server/-/test-zk-chat-server-1.0.44.tgz#c279c33f7b9f7d7d230388bd632b28c53a2e98e6"
+  integrity sha512-FNeeI2R9DduQ/rmJ26B4sktseLZNABn93X7b7DmKkamJKUX1N4FE3kAVw0elDwYbgWCXIifqdawafBQ1nq7ASw==
   dependencies:
     "@semaphore-protocol/group" "^3.9.0"
     "@zk-kit/identity" "^1.4.1"

@@ -6,8 +6,9 @@ import { ICryptography } from '../crypto/interfaces';
 import { ServerCommunication } from '../communication/index';
 import ProfileManager from "../profile";
 import Hasher from "../hasher";
-import { IFuncGenerateProof } from "src/types";
+import { IFuncGenerateProof } from "../types";
 
+// FIXME: Should be added in config and envs
 const SECONDS_PER_EPOCH = 10;
 
 /**

@@ -4,7 +4,7 @@ import Hasher from "./hasher";
 import { getYShareFromFullProof } from './types';
 
 
-// TODO: Should be in config?
+// FIXME: Should be added in config and envs
 const SECONDS_PER_EPOCH = 10;
 
 export function verifyEpoch(epoch: string, allowedDelay: number): boolean {
