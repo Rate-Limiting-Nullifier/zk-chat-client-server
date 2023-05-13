@@ -76,8 +76,8 @@ const initZKChatServer = async (config: IZKServerConfig) => {
 
     const keyExchangeService: KeyExchangeService = createKeyExchangeService(config, userService, keyExchangeRequestStatsService, new Hasher());
 
-    const interRepSynchronizer = new SemaphoreSynchronizer(redisPubSub, groupService, userService, config);
-    await interRepSynchronizer.sync();
+    const semaphoreSynchronizer = new SemaphoreSynchronizer(redisPubSub, groupService, userService, config);
+    await semaphoreSynchronizer.sync();
 
     const messageHandler: MessageHandlerService = createMessageHandler(config, redisPubSub, userService, requestStatsService);
     const socketServer: SocketServer = createSocketServer(config, messageHandler.handleChatMessage);
