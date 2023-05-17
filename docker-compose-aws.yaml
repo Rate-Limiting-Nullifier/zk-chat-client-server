@@ -69,9 +69,9 @@ services:
     restart: always
     environment:
       - PORT=3000
-      - REACT_APP_SERVER_HOST=https://dev-api.zkchat.org
-      - REACT_APP_SOCKET_HOST=wss://dev-api-wss.zkchat.org
-      - REACT_APP_ENV=https://dev.zkchat.org
+      - REACT_APP_SERVER_HOST=https://api.zkchat.org
+      - REACT_APP_SOCKET_HOST=wss://api-wss.zkchat.org
+      - REACT_APP_ENV=https://zkchat.org
     depends_on:
       - mongo
       - redis
