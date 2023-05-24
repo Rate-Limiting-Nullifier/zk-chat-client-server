@@ -12,6 +12,14 @@ on:
         options:
         - enable
         - disable
+      environment:
+        description: "Environment"
+        required: true
+        default: "enable"
+        type: choice
+        options:
+        - prod
+        - dev
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -22,6 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DATA: ${{ github.event.inputs.build }}
+      DATA_ENV: ${{ github.event.inputs.environment }}
     permissions:
       id-token: write
       contents: read
@@ -32,6 +41,15 @@ jobs:
         with:
           persist-credentials: false
           
+      - name: Check branch and environment
+        run: |
+          if [ "${{ env.DATA_ENV }}" = "prod" ]; then
+            if [ "$GITHUB_BASE_REF" != "main" ]; then
+              echo "Operation not permitted"
+              exit 1
+            fi
+          fi
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -45,4 +63,4 @@ jobs:
 
       - name: Create Deployment
         run: |
-          .github/scripts/deploy.sh
+          .github/scripts/deploy.sh ${{ env.DATA_ENV }}
