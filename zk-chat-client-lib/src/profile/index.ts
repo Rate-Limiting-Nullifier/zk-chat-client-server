@@ -5,6 +5,15 @@ import { deepClone } from '../util';
 import { StorageProvider } from '../storage/interfaces';
 import { IProfile, IRooms, ITrustedContact, ITrustedContactsMap } from './interfaces';
 
+
+// FIXME: right now we just hardcode the default chatroom, but we should probably make it configurable
+const defaultChatroom: IPublicRoom = {
+    id: "c44e8b47-2c9e-4575-b87d-70ee9f2e1a2f",
+    name: "Lobby",
+    type: "PUBLIC",
+    symmetric_key: "{\"alg\":\"A128GCM\",\"ext\":true,\"k\":\"clgPxSs2Tk9xKGYrTNU8eA\",\"key_ops\":[\"encrypt\",\"decrypt\"],\"kty\":\"oct\"}"
+}
+
 /**
  * Manages the local profile of the current user. The profile is kept in-memory, and continuously synced with the profile stored in the selected
  * storage provider.
@@ -75,7 +84,7 @@ class ProfileManager {
             user_private_key: userKeyPair.privateKey,
             user_public_key: userKeyPair.publicKey,
             rooms: {
-                public: [],
+                public: [defaultChatroom],
                 private: [],
                 direct: []
             },

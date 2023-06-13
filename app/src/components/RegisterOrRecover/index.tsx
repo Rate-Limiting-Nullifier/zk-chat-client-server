@@ -1,9 +1,7 @@
-import React, { useState } from "react"
 import { useNavigate } from "react-router"
 import styled from "styled-components"
 import * as Colors from "../../constants/colors"
-import RecoverModal from "../Modals/recoverModal"
-import { init, receive_message } from "zk-chat-client"
+import { init, receive_message } from "test-zk-chat-client"
 import { useDispatch } from "react-redux"
 import {
   addMessageToRoomAction,
@@ -11,6 +9,7 @@ import {
 } from "../../redux/actions/actionCreator"
 import { serverUrl, socketUrl } from "../../constants/constants"
 import { generateProof } from "../../util/util";
+import { getIdentityCommitment } from "../../util/request-passport-client"
 
 const StyledRegisterWrapper = styled.div`
   background: ${Colors.ANATRACITE};
@@ -42,7 +41,6 @@ const StyledRButton = styled.button`
 `
 
 const RegisterOrRecover = () => {
-  const [toggleRecoverModal, setToggleRecoverModal] = useState(false)
   const navigate = useNavigate()
   const dispatch = useDispatch()
 
@@ -70,16 +68,19 @@ const RegisterOrRecover = () => {
           await receive_message(receiveMessageCallback)
         })
     } catch (error) {
+      console.log("!@# RegisterOrRecover/index.tsx: error when registering, error=", error);
       navigate("/r-procedure")
     }
   }
 
   const getActiveIdentity = async () => {
-    console.info("getting the identity from zk-keeper")
-    const { injected } = window as any
-    const client = await injected.connect()
-    const id = await client.getActiveIdentity(1, 2)
-    return id
+    console.info("getting the identity from Zuzalu Passport")
+    const identityCommitment = await getIdentityCommitment();
+    console.log("!@# identityCommitment = ", identityCommitment);
+    if (!identityCommitment) {
+      throw new Error("failed to get the identity from Zuzalu Passport")
+    }
+    return identityCommitment.claim.identityCommitment;
   }
 
   const receiveMessageCallback = (message: any, roomId: string) => {
@@ -90,20 +91,8 @@ const RegisterOrRecover = () => {
     <StyledRegisterWrapper>
       <StyledButtonsContainer>
         <StyledRButton color={Colors.DARK_YELLOW} onClick={handleRegisterClick}>
-          {" "}
-          Register{" "}
+          Login
         </StyledRButton>
-        <StyledRButton
-          color={Colors.PASTEL_RED}
-          onClick={() => setToggleRecoverModal(true)}
-        >
-          {" "}
-          Recover{" "}
-        </StyledRButton>
-        <RecoverModal
-          toggleRecoverModal={toggleRecoverModal}
-          setToggleRecoverModal={setToggleRecoverModal}
-        />
       </StyledButtonsContainer>
     </StyledRegisterWrapper>
   )

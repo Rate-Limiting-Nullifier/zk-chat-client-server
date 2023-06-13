@@ -1,4 +1,3 @@
-import React from "react"
 import PublicRoomInvitedScreen from "../PublicRoomInvitedScreen"
 import RegisterOrRecover from "../RegisterOrRecover"
 import Dashboard from "../Dashboard"
@@ -18,9 +17,9 @@ import { ToastContainer } from "react-toastify"
 
 import 'react-toastify/dist/ReactToastify.css';
 import { generateProof } from "../../util/util";
-import "react-toastify/dist/ReactToastify.css"
-import { init, receive_message, get_rooms, IRooms } from 'zk-chat-client';
+import { init, receive_message, get_rooms, IRooms } from 'test-zk-chat-client';
 import { useAppSelector } from "../../redux/hooks/useAppSelector"
+import AuthPopup from "../Passport/popup"
 
 const AppWrapper = () => {
   const navigate = useNavigate()
@@ -53,7 +52,9 @@ const AppWrapper = () => {
           })
         )
       })
+      console.log("!@# AppWrapper/index.tsx: after init")
     } catch (error) {
+      console.log("!@# AppWrapper/index.tsx: error =", error)
       navigate("/r-procedure")
     }
   }
@@ -86,6 +87,7 @@ const AppWrapper = () => {
           <Routes>
             <Route path="/r-procedure" element={<RegisterOrRecover />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/popup" element={<AuthPopup />} />
             <Route
               path="/public/:roomId"
               element={<PublicRoomInvitedScreen />}
